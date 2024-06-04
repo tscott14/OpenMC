@@ -100,12 +100,13 @@ impl BlockFaceCodes {
     /// Returns an array of texture data corresponding to the `BlockFaceCodes`.
     pub fn texture_data(&self) -> [[f32; 2]; 4] {
         match self {
-            Self::BlockFacePositiveX => [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-            Self::BlockFaceNegativeX => [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-            Self::BlockFacePositiveY => [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-            Self::BlockFaceNegativeY => [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-            Self::BlockFacePositiveZ => [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-            Self::BlockFaceNegativeZ => [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+            Self::BlockFacePositiveX => [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+            Self::BlockFaceNegativeX => [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+            Self::BlockFacePositiveY => [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+            Self::BlockFaceNegativeY => [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+            Self::BlockFacePositiveZ => [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+            Self::BlockFaceNegativeZ => [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
+            
         }
     }
 

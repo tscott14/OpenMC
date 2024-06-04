@@ -34,12 +34,15 @@ fn main() {
                 FirstPersonCamera::camera_rotation,
             ),
         )
-        .add_systems(Update, (
-            Level::spawn_update,
-            Level::despawn_update,
-            ChunkMeshes::refresh,
-            level::mesh::culler::refresh_cache,
-        ))
+        .add_systems(
+            Update,
+            (
+                Level::spawn_update,
+                Level::despawn_update,
+                ChunkMeshes::refresh,
+                level::mesh::culler::refresh_cache,
+            ),
+        )
         .add_systems(Update, developement_update)
         .run();
 }
@@ -55,6 +58,7 @@ impl Plugin for OpenMCDefaultPlugins {
                 }),
                 ..default()
             })
+            .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "OpenMC".into(),

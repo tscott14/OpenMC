@@ -79,7 +79,10 @@ impl ChunkMeshBuffer {
                 let vertex_data = code
                     .vertex_data()
                     .map(|v| [v[0] + x as f32, v[1] + y as f32, v[2] + z as f32]);
-                let uv_data = code.texture_data();
+                let uv_data = code.texture_data().map(|uv| {
+                    let (u, v) = block.atlas_position().unwrap_or((3, 3));
+                    [(uv[0] + u as f32) / 4.0, (uv[1] + v as f32) / 4.0]
+                });
                 let normal_data = code.normal_data();
 
                 buffer.extend([[

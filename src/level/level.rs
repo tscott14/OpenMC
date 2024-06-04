@@ -30,7 +30,7 @@ impl RegionMaterial {
         asset_server: &mut AssetServer,
         material_server: &mut Assets<StandardMaterial>,
     ) -> Self {
-        let stone_texture: Handle<Image> = asset_server.load("textures/stone.png");
+        let stone_texture: Handle<Image> = asset_server.load("textures/blocks.png");
         let block_material = StandardMaterial {
             base_color_texture: Some(stone_texture.clone()),
             reflectance: 0f32,
