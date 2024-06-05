@@ -57,7 +57,7 @@ impl FirstPersonCamera {
                 direction.y -= 1.1;
             }
 
-            camera.translation += direction.normalize_or_zero() * time.delta_seconds();
+            camera.translation += 10.0 * direction.normalize_or_zero() * time.delta_seconds();
         }
     }
 
