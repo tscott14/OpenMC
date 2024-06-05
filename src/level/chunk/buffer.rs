@@ -16,16 +16,26 @@ use super::config::CHUNK_SIZE;
 pub struct ChunkBuffer<T: Copy + Default>(pub [[[T; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE]);
 
 impl<T: Copy + Default> ChunkBuffer<T> {
-    /// Creates a new `Buffer` filled with the default value of `T`.
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     /// Creates a new `Buffer` filled with the given value.
-    pub fn from_filled(value: &T) -> Self {
-        let mut buffer = Self::new();
+    pub fn from_item(value: &T) -> Self {
+        let mut buffer = Self::default();
         buffer.fill(value);
         return buffer;
+    }
+
+    /// Creates a new `Buffer` from an array.
+    pub fn from_array(data: [[[T; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE]) -> Self {
+        Self(data)
+    }
+
+    /// Creates a new `Buffer` from a function.
+    pub fn from_fn(f: impl Fn(LevelPosition) -> T) -> Self {
+        ChunkBuffer::<()>::default()
+            .iter()
+            .fold(Self::default(), |mut buffer, (pos, _)| {
+                buffer.set(pos, &f(pos));
+                buffer
+            })
     }
 
     /// Sets the value at the given `LevelPosition` to the given value.
@@ -42,14 +52,14 @@ impl<T: Copy + Default> ChunkBuffer<T> {
 
     /// Fills the `Buffer` with the given value.
     pub fn fill(&mut self, value: &T) {
-        ChunkBuffer::<()>::new()
+        ChunkBuffer::<()>::default()
             .iter()
             .for_each(|(pos, _)| self.set(pos, value));
     }
 
     /// Clears the `Buffer` by resetting all values to their default.
     pub fn clear(&mut self) {
-        *self = Self::new();
+        *self = Self::default();
     }
 }
 
@@ -91,7 +101,7 @@ impl<T: Copy + Default> ChunkBuffer<T> {
 
 impl<T: Copy + Debug + Default> Debug for ChunkBuffer<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Ok(ChunkBuffer::<()>::new().iter().for_each(|(position, _)| {
+        Ok(ChunkBuffer::<()>::default().iter().for_each(|(position, _)| {
             let (x, y, z) = position.get_xyz();
             let value = self.get(position);
 
@@ -106,3 +116,18 @@ impl<T: Copy + Debug + Default> Debug for ChunkBuffer<T> {
         }))
     }
 }
+
+
+// impl<T: Copy + Default, U: Copy + Default> ChunkBuffer<T> {
+//     /// Applies a function to each element in the `Buffer` and returns a new `Buffer`
+//     /// with the results.
+//     pub fn map<F: Fn(LevelPosition, T) -> U>(&self, func: F) -> ChunkBuffer<U> {
+//         let mut new_buffer = ChunkBuffer::default();
+
+//         for (position, value) in self.iter() {
+//             new_buffer.set(position, &func(position, *value));
+//         }
+
+//         new_buffer
+//     }
+// }

@@ -98,7 +98,7 @@ impl ChunkCacheBuffer {
     }
 
     pub fn populate(&mut self, block_data: &ChunkBlockData) {
-        ChunkBuffer::<()>::new().iter().for_each(|(pos, _)| {
+        ChunkBuffer::<()>::default().iter().for_each(|(pos, _)| {
             self.set(pos, &self.config(pos, block_data));
         });
     }

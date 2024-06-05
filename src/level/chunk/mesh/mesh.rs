@@ -65,7 +65,7 @@ impl ChunkMeshBuffer {
 
     pub fn populate(block_data: &ChunkBlockData, cache_buffer: &ChunkCacheBuffer) -> Self {
         let mut buffer = Vec::new();
-        for ((position, _)) in ChunkBuffer::<()>::new().iter() {
+        for ((position, _)) in ChunkBuffer::<()>::default().iter() {
             let block = block_data.get(position);
             let config = cache_buffer.get(position);
 

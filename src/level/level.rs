@@ -5,7 +5,7 @@
  * A class to handle everything involving level management.
  */
 
- use bevy::{
+use bevy::{
     log,
     prelude::*,
     render::{mesh::PrimitiveTopology, render_asset::RenderAssetUsages},
@@ -17,7 +17,7 @@ use crate::level::{
     mesh::culler::ChunkCacheBuffer,
 };
 
-use super::{generators::flat_world::FlatWorldGenerator, LevelPosition};
+use super::{generators::simple_gen::SimpleWorldGenerator, LevelPosition};
 
 #[derive(Resource)]
 pub struct WorldOrigin(LevelPosition);
@@ -66,15 +66,17 @@ impl Level {
         // Create the world origin.
         commands.insert_resource(WorldOrigin(LevelPosition::new(0, 0, 0)));
 
+        let mut chunks: Vec<LevelPosition> = (0..4 * 4)
+            .map(|i| {
+                let (x, z) = (i / 4 - 2, i % 4 - 2);
+                LevelPosition::from_chunk_xyz(x as i32, 0, z as i32)
+            })
+            .collect();
+
+        chunks.push(LevelPosition::from_chunk_xyz(0, 1, 0));
+
         // Create the chunk spawn queue.
-        commands.insert_resource(ChunkSpawnQueue(
-            (0..10 * 10)
-                .map(|i| {
-                    let (x, z) = (i / 10 - 5, i % 10 - 5);
-                    LevelPosition::from_chunk_xyz(x as i32, 0, z as i32)
-                })
-                .collect(),
-        ));
+        commands.insert_resource(ChunkSpawnQueue(chunks));
 
         // Create the chunk despawn queue.
         commands.insert_resource(ChunkDespawnQueue(vec![]));
@@ -86,7 +88,7 @@ impl Level {
         mut material: ResMut<RegionMaterial>,
         mut mesh_server: ResMut<Assets<Mesh>>,
     ) {
-        let mut generator = FlatWorldGenerator { seed: 0 };
+        let mut generator = SimpleWorldGenerator { seed: 0 };
 
         for req_chunk_pos in chunk_spawn_queue.0.drain(..) {
             log::info!("Spawn chunk {:?}", req_chunk_pos.chunk_xyz());

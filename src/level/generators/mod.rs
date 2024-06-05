@@ -5,5 +5,5 @@ pub trait WorldGenerator {
     fn generate_chunk(&mut self, configs: ChunkConfigs, position: LevelPosition) -> ChunkBlockData;
 }
 
-pub mod flat_world;
+pub mod simple_gen;
 

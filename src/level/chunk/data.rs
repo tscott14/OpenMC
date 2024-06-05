@@ -13,18 +13,26 @@ use crate::{block::block::Block, level::LevelPosition};
 
 use super::{buffer::ChunkBuffer, config::CHUNK_SIZE};
 
-#[derive(Component, Clone, Copy, Debug)]
+#[derive(Component, Clone, Copy, Default, Debug)]
 pub struct ChunkBlockData(pub ChunkBuffer<Block>);
 
 impl ChunkBlockData {
-    /// Creates a new `ChunkBlockData` filled with the default `Block`.
-    pub fn new() -> Self {
-        Self::from_filled(&Block::Air)
+    /// Creates a new `ChunkBlockData` filled with the given `Block`.
+    pub fn from_item(block: &Block) -> Self {
+        Self(ChunkBuffer::from_item(block))
     }
 
-    /// Creates a new `ChunkBlockData` filled with the given `Block`.
-    pub fn from_filled(block: &Block) -> Self {
-        Self(ChunkBuffer::from_filled(block))
+    /// Creates a new `ChunkBlockData` from an array.
+    pub fn from_array(data: [[[Block; CHUNK_SIZE]; CHUNK_SIZE]; CHUNK_SIZE]) -> Self {
+        Self(ChunkBuffer::from_array(data))
+    }
+
+    /// Creates a new `ChunkBlockData` from a function.
+    pub fn from_fn(chunk_position: LevelPosition, f: impl Fn(LevelPosition, LevelPosition) -> Block) -> Self {
+        Self(ChunkBuffer::from_fn(|pos| {
+            let (x, y, z) = pos.get_xyz();
+            f(chunk_position.offset(x, y, z), pos)
+        }))
     }
 
     /// Sets the block at the given `LevelPosition` to the given `Block`.
@@ -54,3 +62,4 @@ impl ChunkBlockData {
         self.0.fill(block)
     }
 }
+
