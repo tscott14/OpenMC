@@ -112,7 +112,7 @@ fn toggle_cursor_capture(
 }
 
 fn setup(mut commands: Commands) {
-    commands.spawn(FirstPersonCamera::create_bundle(0.0, 0.0, 2.0));
+    commands.spawn(FirstPersonCamera::create_bundle(0.0, 20.0, 2.0));
 
     commands.spawn(DirectionalLightBundle {
         directional_light: DirectionalLight {

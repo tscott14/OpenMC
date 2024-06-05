@@ -14,7 +14,7 @@ use bevy::{
     render::{mesh::*, render_asset::*},
 };
 
-pub const CHUNK_SIZE: usize = 4;
+pub const CHUNK_SIZE: usize = 16;
 
 #[derive(Component, Clone, Copy, Debug)]
 pub struct ChunkConfigs {
