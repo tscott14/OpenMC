@@ -31,11 +31,19 @@ impl LevelPosition {
         Self::new(self.x + x, self.y + y, self.z + z)
     }
 
-    pub fn chunk_xyz(&self) -> Self {
-        Self::new(
+    pub fn chunk_xyz(&self) -> (i32, i32, i32) {
+        (
             self.x / CHUNK_SIZE as i32,
             self.y / CHUNK_SIZE as i32,
             self.z / CHUNK_SIZE as i32,
+        )
+    }
+
+    pub fn chunk_dxdydz(&self) -> (i32, i32, i32) {
+        (
+            self.x % CHUNK_SIZE as i32,
+            self.y % CHUNK_SIZE as i32,
+            self.z % CHUNK_SIZE as i32,
         )
     }
 
