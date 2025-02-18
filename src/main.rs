@@ -20,8 +20,8 @@ mod utils;
 mod camera;
 mod chunk;
 
-struct OpenMCDefaultPlugins;
-impl Plugin for OpenMCDefaultPlugins {
+struct CraftoriaDefaultPlugins;
+impl Plugin for CraftoriaDefaultPlugins {
     fn build(&self, app: &mut App) {
         let defaults = DefaultPlugins
             .set(RenderPlugin {
@@ -62,7 +62,7 @@ impl Plugin for OpenMCDefaultPlugins {
 
 fn main() {
     App::new()
-        .add_plugins(OpenMCDefaultPlugins)
+        .add_plugins(CraftoriaDefaultPlugins)
         .add_systems(Startup, setup)
         .add_systems(Startup, Level::setup)
         .add_systems(
