@@ -15,8 +15,10 @@ Cargo.lock
 
 
 # Added by cargo
-
 /target
 
 # vscode stuff
 .vscode
+
+# ignore local stuff I don't want backed up
+/.ignore
