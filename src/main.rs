@@ -78,6 +78,7 @@ fn main() {
         .add_plugins(CraftoriaDefaultPlugins)
         // .add_systems(Update, bevy::input::system::exit_on_esc_system)
         .add_systems(Startup, setup)
+        .add_systems(Update, close_on_esc)
         .add_systems(
             Update,
             cursor_grab.run_if(input_just_pressed(KeyCode::KeyG)),
@@ -126,6 +127,23 @@ fn developement_update(
         match config.global {
             true => info!("Wireframe rendering enabled for all meshes"),
             false => info!("Wireframe rendering disabled for all meshes"),
+        }
+    }
+}
+
+// https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#remove-close-on-esc
+pub fn close_on_esc(
+    mut commands: Commands,
+    focused_windows: Query<(Entity, &Window)>,
+    input: Res<ButtonInput<KeyCode>>,
+) {
+    for (window, focus) in focused_windows.iter() {
+        if !focus.focused {
+            continue;
+        }
+
+        if input.just_pressed(KeyCode::Escape) {
+            commands.entity(window).despawn();
         }
     }
 }
