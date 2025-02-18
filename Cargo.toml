@@ -4,9 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { version = "0.13.2", features = ["dynamic_linking"] }
-noisy_bevy = { version = "0.7.0" }
-rand = { version = "0.8.0" }
+bevy = { version = "0.15.2", features = ["dynamic_linking"] }
+cgmath = "0.18.0"
+noisy_bevy = { version = "0.8.0" }
+rand = { version = "0.9.0" }
 
 [profile.dev]
 opt-level = 1
