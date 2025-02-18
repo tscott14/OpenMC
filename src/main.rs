@@ -8,38 +8,29 @@
 #![allow(dead_code, unused)]
 
 use bevy::{
+    dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin},
+    input::{common_conditions::input_just_pressed, keyboard::Key},
     pbr::wireframe::*,
     prelude::*,
     render::{settings::*, *},
     window::*,
     *,
 };
-use camera::FirstPersonCamera;
+use camera_controller::{CameraController, CameraControllerPlugin};
+// use camera::FirstPersonCamera;
 
-mod utils;
-mod camera;
+mod camera_controller;
 mod chunk;
+mod utils;
 
 struct CraftoriaDefaultPlugins;
 impl Plugin for CraftoriaDefaultPlugins {
     fn build(&self, app: &mut App) {
         let defaults = DefaultPlugins
-            .set(RenderPlugin {
-                render_creation: RenderCreation::Automatic(WgpuSettings {
-                    features: WgpuFeatures::POLYGON_MODE_LINE,
-                    ..default()
-                }),
-                ..default()
-            })
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "OpenMC".into(),
-                    cursor: Cursor {
-                        grab_mode: CursorGrabMode::Confined,
-                        visible: false,
-                        ..default()
-                    },
+                    title: "Craftoria".into(),
                     ..default()
                 }),
                 ..default()
@@ -54,79 +45,75 @@ impl Plugin for CraftoriaDefaultPlugins {
                 color: Color::WHITE,
                 brightness: 0.5,
                 ..default()
-            })
-            .add_systems(Update, toggle_cursor_capture)
-            .add_systems(Update, bevy::window::close_on_esc);
+            });
+
+        app.add_plugins(
+            (FpsOverlayPlugin {
+                config: FpsOverlayConfig {
+                    text_config: TextFont {
+                        // Here we define size of our overlay
+                        font_size: 42.0,
+                        // If we want, we can use a custom font
+                        font: default(),
+                        // We could also disable font smoothing,
+                        font_smoothing: text::FontSmoothing::default(),
+                        ..default()
+                    },
+                    // We can also change color of the overlay
+                    text_color: Color::srgb(1.0, 1.0, 1.0),
+                    // We can also set the refresh interval for the FPS counter
+                    // refresh_interval: core::time::Duration::from_millis(100),
+                    enabled: true,
+                    ..Default::default()
+                },
+            }),
+        );
+
+        app.add_plugins(CameraControllerPlugin);
     }
 }
 
 fn main() {
     App::new()
         .add_plugins(CraftoriaDefaultPlugins)
+        // .add_systems(Update, bevy::input::system::exit_on_esc_system)
         .add_systems(Startup, setup)
-        .add_systems(Startup, Level::setup)
         .add_systems(
             Update,
-            (
-                FirstPersonCamera::camera_movement,
-                FirstPersonCamera::camera_rotation,
-            ),
+            cursor_grab.run_if(input_just_pressed(KeyCode::KeyG)),
         )
         .add_systems(
-            Update,
-            (
-                Level::populate_chunk_spawn_queue,
-                Level::spawn_update,
-                Level::despawn_update,
-                Level::apply_culling_status,
-                ChunkMeshes::refresh,
-                level::mesh::culler::refresh_cache,
-            ),
+            PostUpdate,
+            cursor_ungrab.run_if(input_just_pressed(KeyCode::KeyR)),
         )
         .add_systems(Update, developement_update)
         .run();
 }
 
-fn toggle_cursor_capture(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut window: Query<&mut Window, With<PrimaryWindow>>,
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    if let Some(mut window) = window.get_single_mut().ok() {
-        match window.cursor.grab_mode {
-            CursorGrabMode::None => {
-                if keyboard_input.just_pressed(KeyCode::KeyC) {
-                    window.cursor.grab_mode = CursorGrabMode::Confined;
-                    window.cursor.visible = false;
-                    info!("Cursor locked");
-                }
-            }
-            CursorGrabMode::Confined | CursorGrabMode::Locked => {
-                if keyboard_input.just_pressed(KeyCode::KeyC) {
-                    window.cursor.grab_mode = CursorGrabMode::None;
-                    window.cursor.visible = true;
-                    info!("Cursor unlocked");
-                }
-            }
-        }
-    }
-}
+    // commands.spawn(FirstPersonCamera::create_bundle(0.0, 20.0, 2.0));    
+    commands.spawn((
+        Name::new("Camera"),
+        Camera3d::default(),
+        Transform::from_xyz(5.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        CameraController::default()
+    ));
 
-fn setup(mut commands: Commands) {
-    commands.spawn(FirstPersonCamera::create_bundle(0.0, 20.0, 2.0));
-
-    commands.spawn(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            illuminance: light_consts::lux::CLEAR_SUNRISE,
-            shadows_enabled: false,
-            ..default()
-        },
-        transform: Transform {
-            translation: Vec3::new(0.0, 2.0, 0.0),
-            rotation: Quat::from_vec4(Vec4::new(1.0, 1.0, 1.0, 0.0)),
-            ..default()
-        },
+    commands.insert_resource(AmbientLight {
+        color: Color::WHITE,
+        brightness: 100.0,
         ..default()
     });
+
+    commands.spawn((
+        Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0))),
+        MeshMaterial3d(materials.add(Color::srgb_u8(255, 0, 255))),
+        Transform::from_xyz(0.0, 0.0, 0.0),
+    ));
 }
 
 fn developement_update(
@@ -141,4 +128,28 @@ fn developement_update(
             false => info!("Wireframe rendering disabled for all meshes"),
         }
     }
+}
+
+// https://bevy-cheatbook.github.io/window/mouse-grab.html
+fn cursor_grab(mut q_windows: Query<&mut Window, With<PrimaryWindow>>) {
+    let mut primary_window = q_windows.single_mut();
+
+    // if you want to use the cursor, but not let it leave the window,
+    // use `Confined` mode:
+    primary_window.cursor_options.grab_mode = CursorGrabMode::Confined;
+
+    // for a game that doesn't use the cursor (like a shooter):
+    // use `Locked` mode to keep the cursor in one place
+    primary_window.cursor_options.grab_mode = CursorGrabMode::Locked;
+
+    // also hide the cursor
+    primary_window.cursor_options.visible = false;
+}
+
+// https://bevy-cheatbook.github.io/window/mouse-grab.html
+fn cursor_ungrab(mut q_windows: Query<&mut Window, With<PrimaryWindow>>) {
+    let mut primary_window = q_windows.single_mut();
+
+    primary_window.cursor_options.grab_mode = CursorGrabMode::None;
+    primary_window.cursor_options.visible = true;
 }
