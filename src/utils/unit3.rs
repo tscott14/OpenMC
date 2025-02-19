@@ -1,8 +1,7 @@
-use std::ops::{Mul, Range};
+use std::ops::Mul;
 
-use bevy::ecs::component::Component;
 
-use cgmath::{num_traits::Euclid, prelude::*, Vector3};
+use cgmath::{num_traits::Euclid, Vector3};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct BlockUnits<T>(Vector3<T>);
